@@ -15,15 +15,17 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
 async function handlePayment(req: VercelRequest, res: VercelResponse) {
   try {
-    // Use an existing Customer ID if this is a returning customer.
-    const customer = await stripe.customers.create();
+    const { userUID, topUp } = req.body;
+
+    const customer = await stripe.customers.retrieve(userUID);
+
     const ephemeralKey = await stripe.ephemeralKeys.create(
       { customer: customer.id },
       { apiVersion: '2023-10-16' }
     );
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: 1099,
-      currency: 'eur',
+      amount: topUp,
+      currency: 'usd',
       customer: customer.id,
       automatic_payment_methods: {
         enabled: true,
