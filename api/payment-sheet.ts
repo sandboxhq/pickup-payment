@@ -24,7 +24,7 @@ async function handlePayment(req: VercelRequest, res: VercelResponse) {
     );
     const paymentIntent = await stripe.paymentIntents.create({
       amount: topUp,
-      currency: 'usd',
+      currency: 'php',
       customer: customer.id,
       automatic_payment_methods: {
         enabled: true,
