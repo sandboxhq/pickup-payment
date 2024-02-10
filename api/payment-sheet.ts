@@ -15,10 +15,9 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
 async function handlePayment(req: VercelRequest, res: VercelResponse) {
   try {
-    const { userUID, topUp } = req.body;
+    const { topUp } = req.body;
 
-    const customer = await stripe.customers.retrieve(userUID);
-
+    const customer = await stripe.customers.create();
     const ephemeralKey = await stripe.ephemeralKeys.create(
       { customer: customer.id },
       { apiVersion: '2023-10-16' }
