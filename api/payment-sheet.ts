@@ -18,12 +18,23 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
 async function handlePayment(req: VercelRequest, res: VercelResponse) {
   try {
-    const { topUp } = req.body;
+    const { topUp, code } = req.body;
+
     const customer = await stripe.customers.create();
+
+    // // check if the coupon is valid
+
+    // const coupon = 
+
+    await stripe.customers.update(customer.id, {
+      promotion_code: code,
+    })
+
     const ephemeralKey = await stripe.ephemeralKeys.create(
       { customer: customer.id },
       { apiVersion: '2023-10-16' }
     );
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: topUp,
       currency: 'php',
