@@ -1,7 +1,10 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const stripe = new Stripe(process.env.STRIPE_API_KEY);
+
+const stripe = new Stripe(`${process.env.STRIPE_API_KEY}`);
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -16,7 +19,6 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 async function handlePayment(req: VercelRequest, res: VercelResponse) {
   try {
     const { topUp } = req.body;
-
     const customer = await stripe.customers.create();
     const ephemeralKey = await stripe.ephemeralKeys.create(
       { customer: customer.id },
