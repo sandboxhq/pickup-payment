@@ -23,7 +23,7 @@ async function handlePayment(req: VercelRequest, res: VercelResponse) {
     let paymentAmount = topUp;
     if (code) {
       const coupon = await stripe.coupons.retrieve(code);
-      if (!coupon || !coupon.valid) {
+      if (!coupon || !coupon.valid || parseInt(coupon.metadata.times_redeemed) >= 1) {
         return res.status(400).json({ error: 'Invalid coupon' });
       }
 
@@ -55,6 +55,12 @@ async function handlePayment(req: VercelRequest, res: VercelResponse) {
           },
           quantity: 1
         }],
+        discounts: [
+          {
+            coupon: `${code}`
+          }
+        ],
+        customer: customer.id,
         mode: 'payment',
         ui_mode: 'embedded',
         return_url: 'http://localhost:8080/',
@@ -63,9 +69,9 @@ async function handlePayment(req: VercelRequest, res: VercelResponse) {
         // paymentIntent: paymentIntent.client_secret,
         // ephemeralKey: ephemeralKey.secret,
         paymentIntent: payment.client_secret,
-        customer: customer.id,
+        customer: payment.customer,
         publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
-        message: `The user pay amount:${paymentAmount / 100}pesos`
+        message: `The user pay amount:${paymentAmount / 100}pesos`,
       });
     } else {
       const payment = await stripe.checkout.sessions.create({
@@ -79,6 +85,7 @@ async function handlePayment(req: VercelRequest, res: VercelResponse) {
           },
           quantity: 1
         }],
+        customer: customer.id,
         mode: 'payment',
         ui_mode: 'embedded',
         return_url: 'http://localhost:8000/'
@@ -87,10 +94,10 @@ async function handlePayment(req: VercelRequest, res: VercelResponse) {
         // paymentIntent: paymentIntent.client_secret,
         // ephemeralKey: ephemeralKey.secret,
         paymentIntent: payment.client_secret,
-        customer: customer.id,
+        customer: payment.customer,
         clientsecret: payment.client_secret,
         publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
-        message: `The user pay amount: ${topUp / 100} pesos`
+        message: `The user pay amount: ${topUp / 100} pesos`,
       });
     }
 
